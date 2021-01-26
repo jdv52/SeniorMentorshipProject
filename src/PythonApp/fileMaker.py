@@ -1,18 +1,42 @@
 import csv
-import random
+import  matplotlib.pyplot as plt
+import numpy as np
+
+Vector6DList = []
 
 def main():
-	with open('names.csv', 'w', newline="") as csvfile:
-		fieldnames = ['x', 'y', 'z', 'gy-x', 'gy-y', 'gy-z']
-		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	with open('accelSensor.csv', newline="") as csvfile:
+		spamreader = csv.reader(csvfile)
+		for row in spamreader:
+			Vector6D = {}
+			data = []
+			for item in row:
+				try:
+					a = float(item)
+					data.append(a)
+				except ValueError:
+					break
+			if data:
+				while (len(data) != 7):
+					data.append(0);
+				Vector6D['acX'] = data[1]
+				Vector6D['acY'] = data[2]
+				Vector6D['acZ'] = data[3]
+				Vector6D['gyX'] = data[4]
+				Vector6D['gyY'] = data[5]
+				Vector6D['gyZ'] = data[6]
+				Vector6D['time'] = data[0]
+				if Vector6D['time'] < 100:
+					Vector6DList.append(Vector6D)
+				# print(data)
 
-		writer.writeheader()
-		for i in range(100):
-			nums = []
-			for j in range(len(fieldnames)):
-				random.seed()
-				nums.append(random.randint(0, 100))
-			writer.writerow({'x': nums[0], 'y': nums[1], 'z':nums[2], 'gy-x':nums[3], 'gy-y':nums[4], 'gy-z':nums[5]})
-
+def getXvTimePlot():
+	x = [i['time'] for i in Vector6DList]
+	y = [i['acX'] for i in Vector6DList]
+	fig, ax = plt.subplots()
+	ax.plot(x, y, label = "Raw input data")
+	ax.plot(np.convolve(x, np.ones(50)/50, mode = 'valid'))
+	plt.show()
 
 main()
+getXvTimePlot()
